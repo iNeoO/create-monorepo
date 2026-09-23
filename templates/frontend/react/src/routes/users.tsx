@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import type { ColumnDef } from "@tanstack/react-table";
 import { useState } from "react";
-import { DataTable } from "../components/DataTable";
+import { type Columns, DataTable } from "../components/DataTable";
 import { Modal } from "../components/Modal";
 import {
 	useCreateUser,
@@ -70,7 +69,7 @@ function UsersPage() {
 		}
 	}
 
-	const columns: ColumnDef<User>[] = [
+	const columns: Columns<User> = [
 		{ accessorKey: "id", header: "ID" },
 		{ accessorKey: "email", header: "Email" },
 		{

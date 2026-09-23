@@ -5,7 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
-		"build": "tsc -b && vite build",
+		"build": "vite build && tsc -b",
 		"lint": "biome check",
 		"preview": "vite preview"
 	},
@@ -23,13 +23,11 @@
 		"@rolldown/plugin-babel": "__@rolldown/plugin-babel__",
 		"@tailwindcss/vite": "__@tailwindcss/vite__",
 		"@tanstack/router-plugin": "__@tanstack/router-plugin__",
-		"@types/babel__core": "__@types/babel__core__",
 		"@types/node": "catalog:",
 		"@types/react": "__@types/react__",
 		"@types/react-dom": "__@types/react-dom__",
 		"@vitejs/plugin-react": "__@vitejs/plugin-react__",
 		"babel-plugin-react-compiler": "__babel-plugin-react-compiler__",
-		"globals": "__globals__",
 		"tailwindcss": "__tailwindcss__",
 		"typescript": "catalog:",
 		"vite": "__vite__"

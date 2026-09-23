@@ -1,20 +1,30 @@
 import {
 	type ColumnDef,
 	flexRender,
-	getCoreRowModel,
-	useReactTable,
+	type RowData,
+	tableFeatures,
+	useTable,
 } from "@tanstack/react-table";
 
-interface DataTableProps<T> {
+// Declare the table features once: v9 tree-shakes everything not listed here.
+// Add e.g. `rowSortingFeature` when sorting is needed.
+const features = tableFeatures({});
+
+export type Columns<T extends RowData> = ColumnDef<typeof features, T>[];
+
+interface DataTableProps<T extends RowData> {
 	data: T[];
-	columns: ColumnDef<T>[];
+	columns: Columns<T>;
 }
 
-export function DataTable<T>({ data, columns }: DataTableProps<T>) {
-	const table = useReactTable({
+export function DataTable<T extends RowData>({
+	data,
+	columns,
+}: DataTableProps<T>) {
+	const table = useTable({
+		features,
 		data,
 		columns,
-		getCoreRowModel: getCoreRowModel(),
 	});
 
 	return (
@@ -42,7 +52,7 @@ export function DataTable<T>({ data, columns }: DataTableProps<T>) {
 				<tbody className="bg-white divide-y divide-gray-200">
 					{table.getRowModel().rows.map((row) => (
 						<tr key={row.id} className="hover:bg-gray-50">
-							{row.getVisibleCells().map((cell) => (
+							{row.getAllCells().map((cell) => (
 								<td key={cell.id} className="px-4 py-3 text-sm text-gray-900">
 									{flexRender(cell.column.columnDef.cell, cell.getContext())}
 								</td>

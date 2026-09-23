@@ -23,13 +23,13 @@
 	"license": "ISC",
 	"dependencies": {
 		"@monorepo-template/infra": "workspace:*",
+		"@types/pg": "__@types/pg__",
 		"drizzle-orm": "__drizzle-orm__",
 		"pg": "__pg__"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "catalog:",
 		"@types/node": "catalog:",
-		"@types/pg": "__@types/pg__",
 		"drizzle-kit": "__drizzle-kit__",
 		"tsx": "catalog:",
 		"typescript": "catalog:"

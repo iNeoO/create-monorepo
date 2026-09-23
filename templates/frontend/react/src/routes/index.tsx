@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import type { ColumnDef } from "@tanstack/react-table";
 import { useState } from "react";
-import { DataTable } from "../components/DataTable";
+import { type Columns, DataTable } from "../components/DataTable";
 import { Modal } from "../components/Modal";
 import {
 	useCreatePost,
@@ -70,7 +69,7 @@ function PostsPage() {
 		}
 	}
 
-	const columns: ColumnDef<Post>[] = [
+	const columns: Columns<Post> = [
 		{ accessorKey: "id", header: "ID" },
 		{ accessorKey: "title", header: "Titre" },
 		{
