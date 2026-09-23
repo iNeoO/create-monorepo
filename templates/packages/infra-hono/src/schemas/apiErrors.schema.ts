@@ -1,29 +1,18 @@
 import { z } from "zod";
 
+/** Every non-2xx response from the API uses this envelope. */
 export const ErrorSchema = z.object({
 	code: z.string(),
 	error: z.string(),
 });
 
-const ZodIssueSchema = z.object({
-	code: z.string(),
-	path: z.array(z.union([z.string(), z.number()])),
-	message: z.string(),
-	expected: z.any().optional(),
-	received: z.any().optional(),
-	minimum: z.number().optional(),
-	maximum: z.number().optional(),
-	inclusive: z.boolean().optional(),
-	multipleOf: z.number().optional(),
-	unionErrors: z.array(z.unknown()).optional(),
+/** 400 from request validation: the envelope plus the flattened issues. */
+export const ValidationErrorSchema = ErrorSchema.extend({
+	details: z.object({
+		formErrors: z.array(z.string()),
+		fieldErrors: z.record(z.string(), z.array(z.string())),
+	}),
 });
 
-export const ZodErrorSchema = z.object({
-	issues: z.array(ZodIssueSchema),
-	name: z.string(),
-});
-
-export const ZodSafeParseErrorSchema = z.object({
-	error: ZodErrorSchema,
-	success: z.boolean(),
-});
+export type ApiErrorBody = z.infer<typeof ErrorSchema>;
+export type ValidationErrorBody = z.infer<typeof ValidationErrorSchema>;

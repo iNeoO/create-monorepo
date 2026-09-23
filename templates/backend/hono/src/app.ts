@@ -1,5 +1,5 @@
+import { apiError } from "@monorepo-template/infra/helpers";
 import { logMiddleware } from "@monorepo-template/infra/middlewares";
-import { HealthService } from "@monorepo-template/services";
 import { Hono } from "hono";
 import { requestId } from "hono/request-id";
 import { secureHeaders } from "hono/secure-headers";
@@ -10,16 +10,13 @@ import { createUsersController } from "./modules/users/users.controller.js";
 import type { AppServices } from "./services/container.js";
 
 export const createApp = (services: AppServices) => {
-	const healthService = new HealthService(services.db);
 	return new Hono()
 		.use(requestId())
 		.use(logMiddleware)
 		.use(secureHeaders())
-		.route("health", createHealthController(healthService))
+		.route("health", createHealthController(services.health))
 		.route("users", createUsersController(services.users))
 		.route("posts", createPostsController(services.posts))
-		.notFound((c) => {
-			return c.json({ code: "NOT_FOUND", error: "Page not found" }, 404);
-		})
+		.notFound((c) => apiError(c, "NOT_FOUND"))
 		.onError(errorHandler);
 };

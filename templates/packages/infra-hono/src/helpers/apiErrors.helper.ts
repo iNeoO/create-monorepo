@@ -5,7 +5,7 @@ import type { ResolverReturnType } from "hono-openapi";
 import { resolver } from "hono-openapi";
 import {
 	ErrorSchema,
-	ZodSafeParseErrorSchema,
+	ValidationErrorSchema,
 } from "../schemas/apiErrors.schema.js";
 
 type ApiErrorPayload = {
@@ -28,7 +28,10 @@ export type ApiErrorKey =
 	| "AUTH_USER_NOT_FOUND"
 	| "USER_NOT_FOUND"
 	| "POST_NOT_FOUND"
-	| "EMAIL_ALREADY_EXISTS";
+	| "EMAIL_ALREADY_EXISTS"
+	| "NOT_FOUND"
+	| "VALIDATION_ERROR"
+	| "INTERNAL_ERROR";
 
 export const API_ERRORS = {
 	AUTH_EMAIL_ALREADY_EXISTS: {
@@ -101,6 +104,27 @@ export const API_ERRORS = {
 			error: "Email already in use",
 		},
 	},
+	NOT_FOUND: {
+		status: 404,
+		payload: {
+			code: "NOT_FOUND",
+			error: "Resource not found",
+		},
+	},
+	VALIDATION_ERROR: {
+		status: 400,
+		payload: {
+			code: "VALIDATION_ERROR",
+			error: "Invalid request",
+		},
+	},
+	INTERNAL_ERROR: {
+		status: 500,
+		payload: {
+			code: "INTERNAL_ERROR",
+			error: "Internal server error",
+		},
+	},
 } as const satisfies Record<ApiErrorKey, ApiErrorDefinition>;
 
 export const apiError = (c: Context, key: ApiErrorKey) => {
@@ -109,8 +133,8 @@ export const apiError = (c: Context, key: ApiErrorKey) => {
 };
 
 export const apiErrorResolver = (): ResolverReturnType => resolver(ErrorSchema);
-export const apiZodErrorResolver = (): ResolverReturnType =>
-	resolver(ZodSafeParseErrorSchema);
+export const apiValidationErrorResolver = (): ResolverReturnType =>
+	resolver(ValidationErrorSchema);
 
 export const openApi401Unauthorized = (description: string) => ({
 	401: {
@@ -130,11 +154,22 @@ export const openApi400BadRequest = (description: string) => ({
 	},
 });
 
-export const openApi400ZodError = (description: string) => ({
+export const openApi400ValidationError = (description = "Invalid request") => ({
 	400: {
 		description,
 		content: {
-			"application/json": { schema: apiZodErrorResolver() },
+			"application/json": { schema: apiValidationErrorResolver() },
+		},
+	},
+});
+
+export const openApi500InternalError = (
+	description = "Internal server error",
+) => ({
+	500: {
+		description,
+		content: {
+			"application/json": { schema: apiErrorResolver() },
 		},
 	},
 });

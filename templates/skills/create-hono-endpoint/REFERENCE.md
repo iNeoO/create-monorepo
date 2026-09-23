@@ -152,8 +152,9 @@ export const CreateUserRoute = describeRoute({
 - Use **imperative style** (`app.get(...)`, `app.post(...)`) — do NOT chain. The tsconfig has
   `declaration: true`, and chaining with validators produces an inferred return type that TypeScript
   cannot name in the `.d.ts` output (error TS2883).
-- Import `validator` from **`hono-openapi`** — do NOT use `sValidator` from
-  `@hono/standard-validator` or `validator` from `hono-openapi/zod`.
+- Import `validate` from **`@monorepo-template/infra/helpers`** — it wraps `validator` from
+  `hono-openapi` so that 400s use the API error envelope. Do NOT import `validator` directly,
+  nor `sValidator` from `@hono/standard-validator`.
 - Type response variables from the inferred API type before `c.json(...)`.
 - Return error responses via `apiError(c, key)`.
 
@@ -161,9 +162,8 @@ export const CreateUserRoute = describeRoute({
 // <domain>.controller.ts
 import { API_ERROR } from "@monorepo-template/common/constants";
 import { appWithLogs } from "@monorepo-template/infra/factories";
-import { apiError } from "@monorepo-template/infra/helpers";
+import { apiError, validate } from "@monorepo-template/infra/helpers";
 import type { UsersService } from "@monorepo-template/services";
-import { validator } from "hono-openapi";
 import { CreateUserRoute, GetUserRoute, GetUsersRoute } from "./users.route.js";
 import { createUserSchema, userIdParamSchema } from "./users.schema.js";
 import type { UserApiResponse, UsersApiResponse } from "./users.type.js";
@@ -175,14 +175,14 @@ export const createUsersController = (usersService: UsersService) => {
     const response: UsersApiResponse = { data: users };
     return c.json(response, 200);
   });
-  app.get("/:id", GetUserRoute, validator("param", userIdParamSchema), async (c) => {
+  app.get("/:id", GetUserRoute, validate("param", userIdParamSchema), async (c) => {
     const { id } = c.req.valid("param");
     const user = await usersService.findUserById(id);
     if (!user) return apiError(c, "USER_NOT_FOUND");
     const response: UserApiResponse = { data: user };
     return c.json(response, 200);
   });
-  app.post("/", CreateUserRoute, validator("json", createUserSchema), async (c) => {
+  app.post("/", CreateUserRoute, validate("json", createUserSchema), async (c) => {
     const body = c.req.valid("json");
     const result = await usersService.createUser(body);
     if (result === API_ERROR.EMAIL_ALREADY_EXISTS) return apiError(c, "EMAIL_ALREADY_EXISTS");
@@ -369,6 +369,10 @@ export const createApp = (services: AppServices) =>
 
 ## Error wiring
 
+Every non-2xx response uses the same envelope `{ code, error }` (`ErrorSchema` in
+`packages/infra/src/schemas`). Validation failures add `details: { formErrors, fieldErrors }`.
+The 404 (`notFound`) and 500 (`errorHandler`) paths already use it; never return another shape.
+
 When a service can return an `API_ERROR` constant, add the corresponding entry to both:
 
 1. `packages/common/src/constants/apiError.constant.ts` — the `API_ERROR` map (source of truth for error codes)
@@ -401,7 +405,7 @@ pnpm --filter @monorepo-template/hono build
 | DB client + helpers | `@monorepo-template/drizzle` → `Database`, `eq`, `schema` |
 <!--DRIZZLE_END-->
 | Business logic | `@monorepo-template/services` |
-| Request validator | `hono-openapi` → `validator` |
+| Request validator | `@monorepo-template/infra/helpers` → `validate` |
 
 ---
 
@@ -413,7 +417,7 @@ pnpm --filter @monorepo-template/hono build
 - [ ] Every API response shape has a schema in `<domain>.schema.ts`.
 - [ ] Response types in `<domain>.type.ts` use `ApiResponse<T>` — no hand-written `{ data: T }`.
 - [ ] Routes use `openApiResponse` / `openApiResponses` (or `openApiProtectedRoute`).
-- [ ] Controller uses `validator` from `hono-openapi` — NOT `sValidator` from `@hono/standard-validator`.
+- [ ] Controller uses `validate` from `@monorepo-template/infra/helpers` — NOT `validator` from `hono-openapi` nor `sValidator`.
 - [ ] Controller uses imperative style (`app.get(...)`) to avoid TS2883 with `declaration: true`.
 - [ ] Controller returns variables typed from the inferred API type.
 - [ ] Service (if new) added to `packages/services/src/modules/<domain>/` and exported from `packages/services/src/index.ts`.

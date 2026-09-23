@@ -1,8 +1,7 @@
 import { API_ERROR } from "@monorepo-template/common/constants";
 import { appWithLogs } from "@monorepo-template/infra/factories";
-import { apiError } from "@monorepo-template/infra/helpers";
+import { apiError, validate } from "@monorepo-template/infra/helpers";
 import type { PostsService } from "@monorepo-template/services";
-import { validator } from "hono-openapi";
 import {
 	CreatePostRoute,
 	DeletePostRoute,
@@ -28,7 +27,7 @@ export const createPostsController = (postsService: PostsService) => {
 		.get(
 			"/user/:userId",
 			GetPostsByUserRoute,
-			validator("param", postUserIdParamSchema),
+			validate("param", postUserIdParamSchema),
 			async (c) => {
 				const { userId } = c.req.valid("param");
 				const posts = await postsService.findPostsByUser(userId);
@@ -38,7 +37,7 @@ export const createPostsController = (postsService: PostsService) => {
 		.get(
 			"/:id",
 			GetPostRoute,
-			validator("param", postIdParamSchema),
+			validate("param", postIdParamSchema),
 			async (c) => {
 				const { id } = c.req.valid("param");
 				const post = await postsService.findPostById(id);
@@ -49,7 +48,7 @@ export const createPostsController = (postsService: PostsService) => {
 		.post(
 			"/",
 			CreatePostRoute,
-			validator("json", createPostSchema),
+			validate("json", createPostSchema),
 			async (c) => {
 				const body = c.req.valid("json");
 				const post = await postsService.createPost(body);
@@ -59,8 +58,8 @@ export const createPostsController = (postsService: PostsService) => {
 		.patch(
 			"/:id",
 			UpdatePostRoute,
-			validator("param", postIdParamSchema),
-			validator("json", updatePostSchema),
+			validate("param", postIdParamSchema),
+			validate("json", updatePostSchema),
 			async (c) => {
 				const { id } = c.req.valid("param");
 				const body = c.req.valid("json");
@@ -73,7 +72,7 @@ export const createPostsController = (postsService: PostsService) => {
 		.delete(
 			"/:id",
 			DeletePostRoute,
-			validator("param", postIdParamSchema),
+			validate("param", postIdParamSchema),
 			async (c) => {
 				const { id } = c.req.valid("param");
 				const result = await postsService.deletePost(id);

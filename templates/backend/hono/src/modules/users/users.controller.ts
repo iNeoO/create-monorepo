@@ -1,8 +1,7 @@
 import { API_ERROR } from "@monorepo-template/common/constants";
 import { appWithLogs } from "@monorepo-template/infra/factories";
-import { apiError } from "@monorepo-template/infra/helpers";
+import { apiError, validate } from "@monorepo-template/infra/helpers";
 import type { UsersService } from "@monorepo-template/services";
-import { validator } from "hono-openapi";
 import {
 	CreateUserRoute,
 	DeleteUserRoute,
@@ -26,7 +25,7 @@ export const createUsersController = (usersService: UsersService) => {
 		.get(
 			"/:id",
 			GetUserRoute,
-			validator("param", userIdParamSchema),
+			validate("param", userIdParamSchema),
 			async (c) => {
 				const { id } = c.req.valid("param");
 				const user = await usersService.findUserById(id);
@@ -37,7 +36,7 @@ export const createUsersController = (usersService: UsersService) => {
 		.post(
 			"/",
 			CreateUserRoute,
-			validator("json", createUserSchema),
+			validate("json", createUserSchema),
 			async (c) => {
 				const body = c.req.valid("json");
 				const result = await usersService.createUser(body);
@@ -49,8 +48,8 @@ export const createUsersController = (usersService: UsersService) => {
 		.patch(
 			"/:id",
 			UpdateUserRoute,
-			validator("param", userIdParamSchema),
-			validator("json", updateUserSchema),
+			validate("param", userIdParamSchema),
+			validate("json", updateUserSchema),
 			async (c) => {
 				const { id } = c.req.valid("param");
 				const body = c.req.valid("json");
@@ -63,7 +62,7 @@ export const createUsersController = (usersService: UsersService) => {
 		.delete(
 			"/:id",
 			DeleteUserRoute,
-			validator("param", userIdParamSchema),
+			validate("param", userIdParamSchema),
 			async (c) => {
 				const { id } = c.req.valid("param");
 				const result = await usersService.deleteUser(id);

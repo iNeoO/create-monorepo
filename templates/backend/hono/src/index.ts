@@ -1,5 +1,6 @@
 import { serve } from "@hono/node-server";
 import type { LogsBindings } from "@monorepo-template/infra/factories";
+import { apiError } from "@monorepo-template/infra/helpers";
 import { pinoLogger } from "@monorepo-template/infra/libs";
 import { Hono } from "hono";
 import { createApp } from "./app.js";
@@ -9,7 +10,7 @@ import { services } from "./services/container.js";
 const apiApp = createApp(services);
 setupOpenAPI(apiApp);
 const app = new Hono<LogsBindings>();
-app.notFound((c) => c.json({ code: "NOT_FOUND", error: "Page not found" }, 404));
+app.notFound((c) => apiError(c, "NOT_FOUND"));
 app.route("/api", apiApp);
 
 const server = serve(
