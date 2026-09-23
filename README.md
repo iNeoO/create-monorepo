@@ -39,8 +39,8 @@ my-app/
 
 ## Prérequis
 
-- [Node.js](https://nodejs.org) ≥ 20
-- [pnpm](https://pnpm.io) ≥ 11
+- [Node.js](https://nodejs.org) ≥ 22
+- [pnpm](https://pnpm.io) ≥ 12
 - [Docker](https://www.docker.com) (si ORM sélectionné)
 
 ## Démarrage rapide
@@ -75,22 +75,25 @@ pnpm dev
 ## Développement du CLI
 
 ```bash
-# Build
-pnpm build
-
-# Watch
-pnpm dev
-
-# Lint
-pnpm lint
+pnpm build          # compile dist/
+pnpm dev            # watch
+pnpm lint           # biome
+pnpm typecheck      # tsc --noEmit (src + tests)
+pnpm test           # tests unitaires des builders
+pnpm test:e2e       # génère un projet par variante, le lint, le build et démarre Hono
+pnpm check          # lint + typecheck + build + test
 ```
+
+Le e2e accepte `E2E_VARIANT=prisma|drizzle|hono-react-no-db|hono-only|react-only` pour ne
+tester qu'une variante. La CI GitHub (`.github/workflows/ci.yml`) lance `check` puis le e2e en
+matrice sur les cinq variantes.
 
 ## Stack technique
 
 | Couche | Choix |
 | --- | --- |
-| Package manager | pnpm 11 + workspaces |
-| Langage | TypeScript 6 |
+| Package manager | pnpm 12 + workspaces |
+| Langage | TypeScript 7 (compilateur natif) |
 | Linter / Formatter | Biome 2 |
 | Backend | Hono 4 + hono-openapi + @hono/node-server |
 | Frontend | React 19 + TanStack Router/Query + Tailwind 4 + Vite 8 |

@@ -11,5 +11,8 @@ export function useUsers() {
 }
 
 export function useUser(id: number) {
-	return useQuery({ queryKey: usersKeys.detail(id), queryFn: () => getUser(id) });
+	return useQuery({
+		queryKey: usersKeys.detail(id),
+		queryFn: () => getUser(id),
+	});
 }

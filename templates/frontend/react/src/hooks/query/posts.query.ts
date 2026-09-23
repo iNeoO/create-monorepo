@@ -12,9 +12,15 @@ export function usePosts() {
 }
 
 export function usePostsByUser(userId: number) {
-	return useQuery({ queryKey: postsKeys.byUser(userId), queryFn: () => getPostsByUser(userId) });
+	return useQuery({
+		queryKey: postsKeys.byUser(userId),
+		queryFn: () => getPostsByUser(userId),
+	});
 }
 
 export function usePost(id: number) {
-	return useQuery({ queryKey: postsKeys.detail(id), queryFn: () => getPost(id) });
+	return useQuery({
+		queryKey: postsKeys.detail(id),
+		queryFn: () => getPost(id),
+	});
 }

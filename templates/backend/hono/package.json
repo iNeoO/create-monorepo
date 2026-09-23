@@ -10,7 +10,7 @@
 	},
 	"dependencies": {
 		"@hono/node-server": "__@hono/node-server__",
-"@hono/standard-validator": "__@hono/standard-validator__",
+		"@hono/standard-validator": "__@hono/standard-validator__",
 		"@monorepo-template/common": "workspace:*",
 		"@monorepo-template/infra": "workspace:*",
 		"@monorepo-template/prisma": "workspace:*",

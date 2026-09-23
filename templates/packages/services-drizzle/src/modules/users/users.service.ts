@@ -26,7 +26,10 @@ export class UsersService {
 		if (user) {
 			return API_ERROR.EMAIL_ALREADY_EXISTS;
 		}
-		const [created] = await this.drizzle.insert(schema.users).values(payload).returning();
+		const [created] = await this.drizzle
+			.insert(schema.users)
+			.values(payload)
+			.returning();
 		return created;
 	}
 

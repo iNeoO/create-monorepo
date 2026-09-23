@@ -11,9 +11,13 @@
 		"templates"
 	],
 	"scripts": {
-		"build": "rm -rf dist && tsc",
-		"dev": "tsc --watch",
-		"lint": "biome check ."
+		"build": "rm -rf dist && tsc -p tsconfig.build.json",
+		"dev": "tsc -p tsconfig.build.json --watch",
+		"lint": "biome check .",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run",
+		"test:e2e": "vitest run --config vitest.e2e.config.ts",
+		"check": "pnpm run lint && pnpm run typecheck && pnpm run build && pnpm run test"
 	},
 	"dependencies": {
 		"@inquirer/prompts": "^8.7.2"
@@ -21,6 +25,8 @@
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.14",
 		"@types/node": "^26.6.2",
-		"typescript": "^7.0.2"
-	}
+		"typescript": "^7.0.2",
+		"vitest": "^5.0.1"
+	},
+	"packageManager": "pnpm@12.5.1"
 }

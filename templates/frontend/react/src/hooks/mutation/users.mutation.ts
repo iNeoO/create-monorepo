@@ -13,8 +13,14 @@ export function useCreateUser() {
 export function useUpdateUser() {
 	const queryClient = useQueryClient();
 	return useMutation({
-		mutationFn: ({ id, ...body }: { id: number; username?: string; name?: string }) =>
-			updateUser(id, body),
+		mutationFn: ({
+			id,
+			...body
+		}: {
+			id: number;
+			username?: string;
+			name?: string;
+		}) => updateUser(id, body),
 		onSuccess: (_, { id }) => {
 			queryClient.invalidateQueries({ queryKey: usersKeys.all });
 			queryClient.invalidateQueries({ queryKey: usersKeys.detail(id) });

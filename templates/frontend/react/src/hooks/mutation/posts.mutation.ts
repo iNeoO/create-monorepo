@@ -13,8 +13,14 @@ export function useCreatePost() {
 export function useUpdatePost() {
 	const queryClient = useQueryClient();
 	return useMutation({
-		mutationFn: ({ id, ...body }: { id: number; title?: string; content?: string }) =>
-			updatePost(id, body),
+		mutationFn: ({
+			id,
+			...body
+		}: {
+			id: number;
+			title?: string;
+			content?: string;
+		}) => updatePost(id, body),
 		onSuccess: (_, { id }) => {
 			queryClient.invalidateQueries({ queryKey: postsKeys.all });
 			queryClient.invalidateQueries({ queryKey: postsKeys.detail(id) });

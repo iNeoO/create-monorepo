@@ -22,7 +22,10 @@ export class PostsService {
 	}
 
 	async createPost(payload: CreatePostParams) {
-		const [created] = await this.drizzle.insert(schema.posts).values(payload).returning();
+		const [created] = await this.drizzle
+			.insert(schema.posts)
+			.values(payload)
+			.returning();
 		return created;
 	}
 
