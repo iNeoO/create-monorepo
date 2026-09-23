@@ -58,7 +58,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       # Generates a real project with the CLI, then lints it, builds every
-      # package and boots the Hono server. No database is needed for that.
+      # package, builds the production Docker images and boots the Hono
+      # server. No database is needed for that.
       - run: pnpm run test:e2e
         env:
           E2E_VARIANT: ${{ matrix.variant }}
+          E2E_DOCKER: "1"

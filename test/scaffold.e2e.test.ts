@@ -110,6 +110,9 @@ describe.each(variants)("scaffold $name", ({ name, ...answers }) => {
 			run("pnpm hono:build", app);
 		}
 		if (frontend === "react") run("pnpm react:build", app);
+		if (process.env.E2E_DOCKER) {
+			run("docker compose -f docker-compose.prod.yaml build", app);
+		}
 		if (backend !== "hono") return;
 
 		const server = spawn("node", ["apps/hono/dist/index.js"], {

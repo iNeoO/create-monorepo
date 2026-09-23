@@ -10,6 +10,8 @@ import {
 } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { buildProdCompose } from "./builders/docker-compose.js";
+import { buildDockerfile } from "./builders/dockerfile.js";
 import { buildRootPackageJson } from "./builders/package-json.js";
 import { buildWorkspaceYaml } from "./builders/pnpm-workspace.js";
 import { buildReadme } from "./builders/readme.js";
@@ -223,8 +225,9 @@ function stripFrontendData(dest: string, backend: string) {
 		delete pkg.dependencies["@monorepo-template/hono"];
 		delete pkg.dependencies.hono;
 		rmSync(join(reactDir, "src/libs/hc.ts"));
-		// No API to proxy to.
+		// No API to proxy to, neither in dev (vite) nor in prod (nginx).
 		cpSync(join(variant, "vite.config.ts"), join(reactDir, "vite.config.ts"));
+		cpSync(join(variant, "nginx.conf"), join(reactDir, "nginx.conf"));
 	}
 	writeJson(pkgPath, pkg);
 }
@@ -321,6 +324,16 @@ export async function scaffold(
 		join(dest, "README.md"),
 		buildReadme(projectName, backend, frontend, orm),
 	);
+	if (backend !== "none" || frontend !== "none") {
+		writeFileSync(
+			join(dest, "Dockerfile"),
+			buildDockerfile(projectName, backend, frontend, orm),
+		);
+		writeFileSync(
+			join(dest, "docker-compose.prod.yaml"),
+			buildProdCompose(projectName, backend, frontend, orm),
+		);
+	}
 
 	replaceVersions(dest);
 	replaceInDir(dest, "monorepo-template", projectName);
@@ -345,13 +358,11 @@ export async function scaffold(
 		console.log(`  cp .env.example .env  # fill in your values`);
 	if (orm === "prisma") {
 		console.log(`  docker compose up -d`);
-		console.log(`  pnpm common:build && pnpm infra:build`);
 		console.log(`  pnpm prisma:migrate`);
 		console.log(`  pnpm prisma:generate`);
 	}
 	if (orm === "drizzle") {
 		console.log(`  docker compose up -d`);
-		console.log(`  pnpm common:build && pnpm infra:build`);
 		console.log(`  pnpm drizzle:generate`);
 		console.log(`  pnpm drizzle:push`);
 	}

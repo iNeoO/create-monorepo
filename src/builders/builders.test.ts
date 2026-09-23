@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { VERSIONS } from "../versions.js";
+import { buildProdCompose } from "./docker-compose.js";
+import { buildDockerfile } from "./dockerfile.js";
 import { buildRootPackageJson } from "./package-json.js";
 import { buildWorkspaceYaml } from "./pnpm-workspace.js";
 import { buildReadme } from "./readme.js";
@@ -85,5 +87,46 @@ describe("buildReadme", () => {
 		expect(readme).toContain("pnpm drizzle:push");
 		expect(readme).not.toContain("prisma");
 		expect(readme).not.toContain("react/");
+	});
+});
+
+describe("buildDockerfile", () => {
+	it("full stack: generate, build libs, prune the api, serve the web", () => {
+		const dockerfile = buildDockerfile("app", "hono", "react", "prisma");
+
+		expect(dockerfile).toContain(`PNPM_VERSION=${VERSIONS.pnpm} sh -`);
+		expect(dockerfile).toContain("RUN pnpm --filter @app/prisma generate");
+		expect(dockerfile).toContain(
+			"RUN pnpm deploy --legacy --filter @app/hono --prod /prod/api",
+		);
+		expect(dockerfile).toContain("FROM node:24-alpine AS api");
+		expect(dockerfile).toContain("FROM nginx:alpine AS web");
+	});
+
+	it("frontend only: no api stage, no prisma", () => {
+		const dockerfile = buildDockerfile("app", "none", "react", "none");
+
+		expect(dockerfile).not.toContain("AS api");
+		expect(dockerfile).not.toContain("prisma");
+		expect(dockerfile).toContain("RUN pnpm run react:build");
+	});
+});
+
+describe("buildProdCompose", () => {
+	it("chains postgres, migrate and api, exposes only the web", () => {
+		const compose = buildProdCompose("app", "hono", "react", "drizzle");
+
+		expect(compose).toContain("command: pnpm --filter @app/drizzle migrate");
+		expect(compose).toContain("condition: service_completed_successfully");
+		expect(compose).toContain('- "${WEB_PORT:-8080}:80"');
+		expect(compose).not.toContain("API_PORT");
+	});
+
+	it("api without database or frontend is published directly", () => {
+		const compose = buildProdCompose("app", "hono", "none", "none");
+
+		expect(compose).not.toContain("postgres");
+		expect(compose).not.toContain("migrate");
+		expect(compose).toContain('- "${API_PORT:-4000}:4000"');
 	});
 });

@@ -33,7 +33,9 @@ my-app/
 │   └── services/      # couche service (PostsService, UsersService…)
 ├── .claude/skills/    # skills Claude Code (si sélectionnés)
 ├── biome.json
-├── docker-compose.yaml
+├── Dockerfile               # image multi-stage (api, web, migrations)
+├── docker-compose.yaml      # dev : PostgreSQL seul
+├── docker-compose.prod.yaml # prod : toute la stack
 └── pnpm-workspace.yaml
 ```
 
@@ -81,6 +83,7 @@ pnpm lint           # biome
 pnpm typecheck      # tsc --noEmit (src + tests)
 pnpm test           # tests unitaires des builders
 pnpm test:e2e       # génère un projet par variante, le lint, le build et démarre Hono
+E2E_DOCKER=1 pnpm test:e2e   # idem, plus le build des images Docker de prod
 pnpm check          # lint + typecheck + build + test
 ```
 

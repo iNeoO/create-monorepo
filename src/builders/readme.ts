@@ -61,6 +61,31 @@ export function buildReadme(
 	}
 	lines.push("");
 
+	if (backend !== "none" || frontend !== "none") {
+		lines.push("## Production (Docker)", "");
+		lines.push(
+			"`Dockerfile` builds every brick in one multi-stage image; `docker-compose.prod.yaml` wires them.",
+		);
+		if (orm !== "none")
+			lines.push(
+				"Database credentials come from `.env`; migrations run before the API starts.",
+			);
+		lines.push("");
+		lines.push("```bash");
+		lines.push("docker compose -f docker-compose.prod.yaml up -d --build");
+		lines.push("```", "");
+		const ports: string[] = [];
+		if (frontend === "react")
+			ports.push("`WEB_PORT` (default 8080) serves the frontend");
+		if (backend === "hono" && frontend === "none")
+			ports.push("`API_PORT` (default 4000) serves the API");
+		if (backend === "hono" && frontend === "react")
+			ports.push(
+				"the API is only reachable through the frontend proxy on `/api`",
+			);
+		lines.push(`Ports: ${ports.join("; ")}.`, "");
+	}
+
 	lines.push("## Structure", "");
 	lines.push("```");
 	lines.push(`${name}/`);
@@ -89,7 +114,12 @@ export function buildReadme(
 				: "│   └── services/      # Business logic (PostsService, UsersService…)",
 		);
 	lines.push("├── biome.json");
-	if (orm !== "none") lines.push("├── docker-compose.yaml");
+	if (backend !== "none" || frontend !== "none") {
+		lines.push("├── Dockerfile");
+		lines.push("├── docker-compose.prod.yaml   # production stack");
+	}
+	if (orm !== "none")
+		lines.push("├── docker-compose.yaml        # dev database");
 	lines.push("└── pnpm-workspace.yaml");
 	lines.push("```", "");
 
