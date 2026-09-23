@@ -21,17 +21,16 @@ export function buildReadme(
 	lines.push("## Stack", "", ...stack, "");
 
 	lines.push("## Prerequisites", "");
-	lines.push("- [Node.js](https://nodejs.org) ≥ 20");
-	lines.push("- [pnpm](https://pnpm.io) ≥ 11");
+	lines.push("- [Node.js](https://nodejs.org) ≥ 22");
+	lines.push("- [pnpm](https://pnpm.io) ≥ 12");
 	if (orm !== "none") lines.push("- [Docker](https://www.docker.com)");
 	lines.push("");
 
 	lines.push("## First-time setup", "");
 	lines.push("```bash");
-	if (orm !== "none") {
-		lines.push("cp .env.example .env   # configure DB credentials");
-		lines.push("docker compose up -d   # start PostgreSQL");
-	}
+	if (backend === "hono")
+		lines.push("cp .env.example .env   # configure the app");
+	if (orm !== "none") lines.push("docker compose up -d   # start PostgreSQL");
 	if (orm === "prisma") {
 		lines.push("pnpm prisma:migrate    # run migrations");
 		lines.push("pnpm prisma:generate   # generate Prisma client");
@@ -83,9 +82,11 @@ export function buildReadme(
 	lines.push("│   ├── common/        # Shared types & schemas");
 	if (backend === "hono")
 		lines.push("│   ├── infra/         # Logger (Pino), OpenAPI helpers");
-	if (orm !== "none")
+	if (backend === "hono")
 		lines.push(
-			"│   └── services/      # Business logic (PostsService, UsersService…)",
+			orm === "none"
+				? "│   └── services/      # Business logic (HealthService…)"
+				: "│   └── services/      # Business logic (PostsService, UsersService…)",
 		);
 	lines.push("├── biome.json");
 	if (orm !== "none") lines.push("├── docker-compose.yaml");

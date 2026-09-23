@@ -1,8 +1,13 @@
 import { type PrismaClient, prisma } from "@monorepo-template/prisma";
-import { PostsService, UsersService } from "@monorepo-template/services";
+import {
+	HealthService,
+	PostsService,
+	UsersService,
+} from "@monorepo-template/services";
 
 export type AppServices = {
 	db: PrismaClient;
+	health: HealthService;
 	posts: PostsService;
 	users: UsersService;
 };
@@ -10,6 +15,7 @@ export type AppServices = {
 export const createServices = (): AppServices => {
 	return {
 		db: prisma,
+		health: new HealthService(prisma),
 		posts: new PostsService(prisma),
 		users: new UsersService(prisma),
 	};

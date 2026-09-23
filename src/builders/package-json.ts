@@ -6,20 +6,19 @@ export function buildRootPackageJson(
 	frontend: string,
 	orm: string,
 ) {
-	const scripts: Record<string, string> = {};
+	const scripts: Record<string, string> = {
+		lint: "biome check .",
+	};
 
 	if (backend === "hono") {
 		scripts["hono:dev"] = `dotenv -e .env -- pnpm --filter @${name}/hono dev`;
 		scripts["hono:build"] = `pnpm --filter @${name}/hono build`;
 		scripts["common:build"] = `pnpm --filter @${name}/common build`;
 		scripts["infra:build"] = `pnpm --filter @${name}/infra build`;
-		if (orm === "prisma" || orm === "drizzle") {
-			scripts["services:build"] = `pnpm --filter @${name}/services build`;
-		}
+		scripts["services:build"] = `pnpm --filter @${name}/services build`;
 		const libsBuildParts = ["pnpm run common:build", "pnpm run infra:build"];
 		if (orm !== "none") libsBuildParts.push(`pnpm run ${orm}:build`);
-		if (orm === "prisma" || orm === "drizzle")
-			libsBuildParts.push("pnpm run services:build");
+		libsBuildParts.push("pnpm run services:build");
 		scripts["dev:libs:build"] = libsBuildParts.join(" && ");
 	}
 
@@ -66,7 +65,9 @@ export function buildRootPackageJson(
 	if (runtimeParts.length > 0) devParts.push("pnpm run dev:runtime");
 	if (devParts.length > 0) scripts.dev = devParts.join(" && ");
 
-	const devDeps: Record<string, string> = {};
+	const devDeps: Record<string, string> = {
+		"@biomejs/biome": "catalog:",
+	};
 	if (runtimeParts.length > 1) devDeps.concurrently = VERSIONS.concurrently;
 
 	return {
@@ -79,6 +80,6 @@ export function buildRootPackageJson(
 		dependencies: {
 			"dotenv-cli": VERSIONS["dotenv-cli"],
 		},
-		...(Object.keys(devDeps).length > 0 && { devDependencies: devDeps }),
+		devDependencies: devDeps,
 	};
 }

@@ -9,17 +9,16 @@ export function buildWorkspaceYaml(
 	if (backend !== "none" || frontend !== "none") pkgs.push("'apps/*'");
 	if (orm !== "none") pkgs.push('"db/*"');
 
+	// pnpm 12 refuses to install when a dependency's build script is neither
+	// allowed nor denied. esbuild comes with tsx (backend) and drizzle-kit.
 	const allowBuilds: string[] = [];
+	if (backend === "hono" || orm !== "none") allowBuilds.push("  esbuild: true");
 	if (orm === "prisma") {
 		allowBuilds.push(
 			"  '@prisma/engines': true",
-			"  esbuild: true",
 			"  prisma: true",
 			"  protobufjs: true",
 		);
-	}
-	if (orm === "drizzle") {
-		allowBuilds.push("  esbuild: true");
 	}
 
 	const catalog: string[] = [
